@@ -7,8 +7,8 @@
 #include "qapi/qapi-types-ui.h"
 
 #ifdef CONFIG_OPENGL
-# include <epoxy/gl.h>
 # include "ui/shader.h"
+# include <libepoxy/gl.h>
 #endif
 
 /* keyboard/mouse support */

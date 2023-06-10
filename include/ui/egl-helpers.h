@@ -1,8 +1,7 @@
 #ifndef EGL_HELPERS_H
 #define EGL_HELPERS_H
 
-#include <epoxy/gl.h>
-#include <epoxy/egl.h>
+#include <libepoxy/egl.h>
 #ifdef CONFIG_GBM
 #include <gbm.h>
 #endif

@@ -14,6 +14,7 @@
 #ifdef CONFIG_INT128_TYPE
 #include "host/cpuinfo.h"
 #include "tcg/debug-assert.h"
+#include <emmintrin.h>
 
 /*
  * Through clang 16, with -mcx16, __atomic_load_n is incorrectly
@@ -28,7 +29,8 @@ static inline Int128 atomic16_read_ro(const Int128 *ptr)
     Int128Alias r;
 
     tcg_debug_assert(HAVE_ATOMIC128_RO);
-    asm("vmovdqa %1, %0" : "=x" (r.i) : "m" (*ptr));
+    // asm("vmovdqa %1, %0" : "=x" (r.i) : "m" (*ptr));
+    _mm_store_si128((__m128i*)ptr, (__m128i)r.i);
 
     return r.s;
 }
@@ -39,7 +41,8 @@ static inline Int128 atomic16_read_rw(Int128 *ptr)
     Int128Alias r;
 
     if (HAVE_ATOMIC128_RO) {
-        asm("vmovdqa %1, %0" : "=x" (r.i) : "m" (*ptr_align));
+        // asm("vmovdqa %1, %0" : "=x" (r.i) : "m" (*ptr_align));
+        _mm_store_si128((__m128i*)ptr_align, (__m128i)r.i);
     } else {
         r.i = __sync_val_compare_and_swap_16(ptr_align, 0, 0);
     }
@@ -52,7 +55,8 @@ static inline void atomic16_set(Int128 *ptr, Int128 val)
     Int128Alias new = { .s = val };
 
     if (HAVE_ATOMIC128_RO) {
-        asm("vmovdqa %1, %0" : "=m"(*ptr_align) : "x" (new.i));
+        // asm("vmovdqa %1, %0" : "=m"(*ptr_align) : "x" (new.i));
+        _mm_store_si128((__m128i*)ptr_align, (__m128i)new.i);
     } else {
         __int128_t old;
         do {

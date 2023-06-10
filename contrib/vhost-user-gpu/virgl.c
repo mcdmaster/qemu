@@ -16,7 +16,7 @@
 #include <virglrenderer.h>
 #include "virgl.h"
 
-#include <epoxy/gl.h>
+#include <libepoxy/gl.h>
 
 void
 vg_virgl_update_cursor_data(VuGpu *g, uint32_t resource_id,

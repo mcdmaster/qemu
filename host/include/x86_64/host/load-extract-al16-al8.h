@@ -10,6 +10,7 @@
 
 #ifdef CONFIG_INT128_TYPE
 #include "host/cpuinfo.h"
+#include <emmintrin.h>
 
 /**
  * load_atom_extract_al16_or_al8:
@@ -34,10 +35,12 @@ load_atom_extract_al16_or_al8(void *pv, int s)
      * making the branch highly predictable.  Otherwise we must use VMOVDQA
      * when ptr_align % 16 == 0 for 16-byte atomicity.
      */
-    if ((cpuinfo & CPUINFO_ATOMIC_VMOVDQU) || (pi & 8)) {
-        asm("vmovdqu %1, %0" : "=x" (r.i) : "m" (*ptr_align));
+    if (cpuinfo & CPUINFO_ATOMIC_VMOVDQU || pi & 8) {
+       _mm_storeu_si128((__m128i*)ptr_align, (__m128i)r.i);
+       // __asm ("MOVDQU %1, %0" : "=rm" (r.i) : "m" (*ptr_align) :);
     } else {
-        asm("vmovdqa %1, %0" : "=x" (r.i) : "m" (*ptr_align));
+       _mm_store_si128((__m128i*)ptr_align, (__m128i)r.i);
+       // __asm ("MOVDQA %1, %0" : "=rm" (r.i) : "m" (*ptr_align) :);
     }
     return int128_getlo(int128_urshift(r.s, shr));
 }
@@ -46,5 +49,6 @@ load_atom_extract_al16_or_al8(void *pv, int s)
 uint64_t QEMU_ERROR("unsupported atomic")
     load_atom_extract_al16_or_al8(void *pv, int s);
 #endif
+
 
 #endif /* X86_64_LOAD_EXTRACT_AL16_AL8_H */

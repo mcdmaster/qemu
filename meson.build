@@ -1418,13 +1418,17 @@ endif
 
 opengl = not_found
 if not get_option('opengl').auto() or have_system or have_vhost_user_gpu
-  epoxy = dependency('epoxy', method: 'pkg-config',
+  # if targetos == 'darwin'
+  #  opengl = dependency('appleframeworks', modules: ['OpenGL', 'GLKit'])
+  # else
+    epoxy = dependency('epoxy', method: 'pkg-config',
                       required: get_option('opengl'))
-  if cc.has_header('epoxy/egl.h', dependencies: epoxy)
-    opengl = epoxy
-  elif get_option('opengl').enabled()
-    error('epoxy/egl.h not found')
-  endif
+    if cc.has_header('libepoxy/egl.h', dependencies: epoxy)
+      opengl = epoxy
+    elif get_option('opengl').enabled()
+      error('libepoxy/egl.h not found')
+    endif
+  # endif
 endif
 gbm = not_found
 if (have_system or have_tools) and (virgl.found() or opengl.found())
